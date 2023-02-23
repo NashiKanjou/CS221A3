@@ -10,6 +10,7 @@ import java.util.Stack;
 
 import org.apache.commons.text.StringEscapeUtils;
 
+import fileConfiguration.Encoder;
 import fileConfiguration.YamlConfiguration;
 
 public class Indexer {
@@ -22,6 +23,8 @@ public class Indexer {
 	public static YamlConfiguration yml;
 
 	public static void main(String args[]) {
+		Encoder.Encode("5");
+		
 		yml = new YamlConfiguration(new File("test.yml"));
 		/*
 		 * System.out.println(yml.getInteger("testint")); for (String str :
