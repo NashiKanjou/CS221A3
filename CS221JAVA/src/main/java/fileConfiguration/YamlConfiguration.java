@@ -19,7 +19,6 @@ import org.yaml.snakeyaml.Yaml;
 public class YamlConfiguration {
 	private Map<String, Object> map;
 	private Yaml yml;
-	private static final String path = "C:\\Users\\Nashi\\eclipse-workspace\\CS221JAVA\\saved";
 
 	public YamlConfiguration(File file) {
 		DumperOptions options = new DumperOptions();
@@ -101,6 +100,83 @@ public class YamlConfiguration {
 		return map.keySet();
 	}
 
+	@SuppressWarnings("unchecked")
+	public void new_save(String path) {
+		FileWriter writer;
+		Map<Character, Map<String, Object>> temp = new HashMap<Character, Map<String, Object>>();// <char,<word,<doc,list>>>
+		for (String str : map.keySet()) {// word <word,<doc,list>>
+			char c = str.charAt(0);
+			if (temp.containsKey(c)) {
+				Map<String, Object> m = temp.get(c);
+				m.put(str, map.get(str));
+			} else {
+				Map<String, Object> m = new HashMap<String, Object>();
+				m.put(str, map.get(str));
+				temp.put(c, m);
+			}
+		}
+		map.clear();
+		try {
+			for (char c : temp.keySet()) {
+				char p = c;
+				if (p > 122 || p < 97) {
+					// System.out.println(p + ": " + (int) p);
+					p = '#';
+				}
+				File folder = new File(path + File.separator + p);
+				folder.mkdirs();
+				Map<String, Object> wordmap = temp.get(c);// <word,<doc,list>>
+				Set<String> words = wordmap.keySet();
+
+				for (String word : words) {
+					Map<String, List<Integer>> m = ((Map<String, List<Integer>>) wordmap.get(word));
+					Set<String> ids = m.keySet();
+					for (String id : ids) {
+
+						File file = new File(
+								path + File.separator + p + File.separator + word + File.separator + id + ".yml");
+						File f = new File(path + File.separator + p + File.separator + word);
+						f.mkdirs();
+
+						if (!file.exists()) {
+							file.createNewFile();
+							writer = new FileWriter(file);
+							Map<String, Object> data = new HashMap<String, Object>();
+							data.put("index", m.get(id));
+							data.put("NumOccurrences", m.get(id).size());
+							yml.dump(data, writer);
+						} else {
+							YamlConfiguration y = new YamlConfiguration(file);
+							List<Object> fromfile = y.getList("index");
+
+							List<Integer> newdata = m.get(id);
+							List<Integer> result = new ArrayList<Integer>();
+
+							for (Object index : fromfile) {
+								result.add((Integer) index);
+							}
+
+							for (int index : newdata) {
+								result.add((Integer) index);
+							}
+							Map<String, Object> data = new HashMap<String, Object>();
+							data.put("index", result);
+							data.put("NumOccurrences", result.size());
+
+							writer = new FileWriter(file);
+							yml.dump(data, writer);
+
+						}
+
+					}
+
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+/*
 	@SuppressWarnings("unchecked")
 	public void save() {
 		FileWriter writer;
@@ -185,7 +261,7 @@ public class YamlConfiguration {
 			e.printStackTrace();
 		}
 	}
-
+*/
 	public void save(File file) {
 		FileWriter writer;
 		try {
